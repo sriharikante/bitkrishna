@@ -4,18 +4,20 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("postgresql://bitkrishna_db_user:1iWhOft6rNv8NTc3zVgJnixNkoLMxjI5@dpg-d6g7qsp5pdvs73dcv240-a/bitkrishna_db")
 }
 
 model Contact {
   id             Int       @id @default(autoincrement())
-  phoneNumber    String?
-  email          String?
+  phoneNumber    String?   @db.VarChar(20)
+  email          String?   @db.VarChar(255)
   linkedId       Int?
   linkPrecedence String    @default("primary")
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
   deletedAt      DateTime?
 
+  @@index([email])
+  @@index([phoneNumber])
   @@map("contacts")
 }

@@ -5,7 +5,7 @@ import { prisma } from "../utils/prismaClient";
 
 interface IdentityResponse {
   contact: {
-    primaryContatctId: number;   // NOTE: matches spec spelling ("Contatct")
+    primaryContactId: number; 
     emails: string[];
     phoneNumbers: string[];
     secondaryContactIds: number[];
@@ -39,7 +39,7 @@ function buildResponse(
 
   return {
     contact: {
-      primaryContatctId: primary.id,
+      primaryContactId: primary.id,
       emails,
       phoneNumbers,
       secondaryContactIds: secondaries.map((c) => c.id),

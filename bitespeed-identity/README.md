@@ -1,14 +1,39 @@
 # Bitespeed Identity Reconciliation API
 
+## Live Endpoint
+
+**Base URL:**  
+https://bitkrishna.onrender.com  
+
+**Identify Endpoint:**  
+POST https://bitkrishna.onrender.com/identify  
+
+> Note: This service is deployed on Render free tier.  
+> It may take 20–40 seconds to respond after inactivity due to cold start.
+
+---
+
+## Quick Production Test
+
+```bash
+curl -X POST https://bitkrishna.onrender.com/identify \
+  -H "Content-Type: application/json" \
+  -d '{"email": "test@test.com", "phoneNumber": "123456"}'
+```
+
+---
+
 A production-ready REST API that identifies and reconciles customer identities across multiple purchases using email and phone number matching.
+
+---
 
 ## Tech Stack
 
-- **Runtime**: Node.js + TypeScript
-- **Framework**: Express.js
-- **ORM**: Prisma
-- **Database**: PostgreSQL
-- **Deployment**: Render.com
+- **Runtime:** Node.js + TypeScript  
+- **Framework:** Express.js  
+- **ORM:** Prisma  
+- **Database:** PostgreSQL  
+- **Deployment:** Render.com  
 
 ---
 
@@ -18,17 +43,17 @@ A production-ready REST API that identifies and reconciles customer identities a
 bitespeed-identity/
 ├── src/
 │   ├── controllers/
-│   │   └── identityController.ts   # Request parsing & validation
+│   │   └── identityController.ts
 │   ├── routes/
-│   │   └── identityRoutes.ts       # Express route definitions
+│   │   └── identityRoutes.ts
 │   ├── services/
-│   │   └── identityService.ts      # Core business logic
+│   │   └── identityService.ts
 │   ├── utils/
-│   │   ├── prismaClient.ts         # Singleton Prisma client
-│   │   └── responseHelper.ts       # JSON response helpers
-│   └── app.ts                      # Express app entry point
+│   │   ├── prismaClient.ts
+│   │   └── responseHelper.ts
+│   └── app.ts
 ├── prisma/
-│   └── schema.prisma               # Database schema
+│   └── schema.prisma
 ├── .env.example
 ├── .gitignore
 ├── package.json
@@ -43,10 +68,12 @@ bitespeed-identity/
 ### Prerequisites
 
 - Node.js >= 18
-- PostgreSQL running locally or a remote connection string
+- PostgreSQL (local or remote)
 - npm
 
-### 1. Clone & Install
+---
+
+### 1️⃣ Clone & Install
 
 ```bash
 git clone https://github.com/your-username/bitespeed-identity.git
@@ -54,13 +81,11 @@ cd bitespeed-identity
 npm install
 ```
 
-### 2. Configure Environment
+---
 
-```bash
-cp .env.example .env
-```
+### 2️⃣ Configure Environment
 
-Edit `.env`:
+Create a `.env` file:
 
 ```env
 DATABASE_URL="postgresql://postgres:password@localhost:5432/bitespeed?schema=public"
@@ -68,22 +93,34 @@ PORT=3000
 NODE_ENV=development
 ```
 
-### 3. Run Migrations (Development)
+---
+
+### 3️⃣ Run Migrations (Development)
 
 ```bash
 npx prisma migrate dev --name init
 ```
 
-### 4. Generate Prisma Client
+---
+
+### 4️⃣ Generate Prisma Client
 
 ```bash
 npx prisma generate
 ```
 
-### 5. Start Dev Server
+---
+
+### 5️⃣ Start Development Server
 
 ```bash
 npm run dev
+```
+
+Server runs at:
+
+```
+http://localhost:3000
 ```
 
 ---
@@ -97,13 +134,16 @@ npm start
 
 ---
 
-## API Reference
+# API Reference
 
-### POST /identify
+---
+
+## POST /identify
 
 Identifies or creates a contact based on email and/or phone number.
 
-**Request Body:**
+### Request Body
+
 ```json
 {
   "email": "user@example.com",
@@ -113,7 +153,10 @@ Identifies or creates a contact based on email and/or phone number.
 
 At least one of `email` or `phoneNumber` must be provided.
 
-**Response:**
+---
+
+### Success Response
+
 ```json
 {
   "contact": {
@@ -125,32 +168,39 @@ At least one of `email` or `phoneNumber` must be provided.
 }
 ```
 
-### GET /health
+---
+
+## GET /health
 
 Returns service health status.
 
 ```json
-{ "status": "ok", "timestamp": "2024-01-01T00:00:00.000Z" }
+{
+  "status": "ok",
+  "timestamp": "2026-01-01T00:00:00.000Z"
+}
 ```
 
 ---
 
-## Logic Summary
+# Logic Summary
 
 | Scenario | Behavior |
-|---|---|
+|-----------|-----------|
 | No match | Create new PRIMARY contact |
 | One match | Link new info as SECONDARY under existing PRIMARY |
-| Two separate primaries match | Older stays PRIMARY, newer becomes SECONDARY |
-| Exact duplicate | No new contact created, return existing cluster |
-| New email + existing phone | Create SECONDARY with new email under cluster's PRIMARY |
-| New phone + existing email | Create SECONDARY with new phone under cluster's PRIMARY |
+| Two separate primaries match | Older remains PRIMARY, newer becomes SECONDARY |
+| Exact duplicate | No new contact created |
+| New email + existing phone | Create SECONDARY under cluster |
+| New phone + existing email | Create SECONDARY under cluster |
 
 ---
 
-## Render Deployment
+# Render Deployment
 
-### Step 1: Push to GitHub
+---
+
+## Step 1: Push to GitHub
 
 ```bash
 git init
@@ -160,181 +210,70 @@ git remote add origin https://github.com/your-username/bitespeed-identity.git
 git push -u origin main
 ```
 
-### Step 2: Create PostgreSQL Database on Render
+---
 
-1. Go to [render.com](https://render.com) → **New** → **PostgreSQL**
-2. Name it `bitespeed-db`, choose free tier, click **Create Database**
+## Step 2: Create PostgreSQL Database on Render
+
+1. Go to Render → **New → PostgreSQL**
+2. Choose Free Tier
 3. Copy the **Internal Database URL**
-
-### Step 3: Create Web Service on Render
-
-1. Go to Render → **New** → **Web Service**
-2. Connect your GitHub repository
-3. Fill in:
-
-| Setting | Value |
-|---|---|
-| **Runtime** | Node |
-| **Build Command** | `npm install && npm run build && npx prisma migrate deploy` |
-| **Start Command** | `npm start` |
-
-4. Add Environment Variables:
-
-| Key | Value |
-|---|---|
-| `DATABASE_URL` | Internal URL from Step 2 |
-| `NODE_ENV` | `production` |
-| `PORT` | `3000` |
-
-5. Click **Create Web Service**
-
-Render will install, build, migrate, and start your server. Your URL will be `https://your-service-name.onrender.com`.
 
 ---
 
-## curl Test Commands
+## Step 3: Create Web Service on Render
 
-Replace `http://localhost:3000` with your Render URL in production.
+Use these settings:
+
+| Setting | Value |
+|----------|--------|
+| Runtime | Node |
+| Build Command | `npm install && npm run build && npx prisma migrate deploy` |
+| Start Command | `npm start` |
+
+Add Environment Variables:
+
+| Key | Value |
+|------|--------|
+| DATABASE_URL | Internal DB URL |
+| NODE_ENV | production |
+| PORT | 3000 |
+
+---
+
+# Testing via curl
+
+Replace localhost with your Render URL in production.
 
 ```bash
-# Test 1: Create new primary contact
+# Create new primary contact
 curl -X POST http://localhost:3000/identify \
   -H "Content-Type: application/json" \
   -d '{"email": "lorraine@hillvalley.edu", "phoneNumber": "123456"}'
 
-# Test 2: Link by shared email (adds new phone as secondary)
-curl -X POST http://localhost:3000/identify \
-  -H "Content-Type: application/json" \
-  -d '{"email": "lorraine@hillvalley.edu", "phoneNumber": "999999"}'
-
-# Test 3: Link by shared phone (adds new email as secondary)
-curl -X POST http://localhost:3000/identify \
-  -H "Content-Type: application/json" \
-  -d '{"email": "mcfly@hillvalley.edu", "phoneNumber": "123456"}'
-
-# Test 4a: Create first standalone primary
-curl -X POST http://localhost:3000/identify \
-  -H "Content-Type: application/json" \
-  -d '{"email": "george@hillvalley.edu", "phoneNumber": "717171"}'
-
-# Test 4b: Create second standalone primary
-curl -X POST http://localhost:3000/identify \
-  -H "Content-Type: application/json" \
-  -d '{"email": "bifftannen@hillvalley.edu", "phoneNumber": "838383"}'
-
-# Test 4c: Merge two primaries (email from first, phone from second)
-curl -X POST http://localhost:3000/identify \
-  -H "Content-Type: application/json" \
-  -d '{"email": "george@hillvalley.edu", "phoneNumber": "838383"}'
-
-# Test 5: Only email provided
-curl -X POST http://localhost:3000/identify \
-  -H "Content-Type: application/json" \
-  -d '{"email": "onlyemail@test.com"}'
-
-# Test 6: Only phone provided
-curl -X POST http://localhost:3000/identify \
-  -H "Content-Type: application/json" \
-  -d '{"phoneNumber": "5555555555"}'
-
-# Test 7: Exact duplicate (no new contact created)
-curl -X POST http://localhost:3000/identify \
-  -H "Content-Type: application/json" \
-  -d '{"email": "lorraine@hillvalley.edu", "phoneNumber": "123456"}'
-
-# Test 8: Validation error (no fields)
-curl -X POST http://localhost:3000/identify \
-  -H "Content-Type: application/json" \
-  -d '{}'
-
-# Test 9: Health check
+# Health check
 curl http://localhost:3000/health
 ```
 
 ---
 
-## Postman Collection
+# Migration Commands
 
-Import this JSON directly into Postman:
+```bash
+# Development
+npx prisma migrate dev --name init
 
-```json
-{
-  "info": {
-    "name": "Bitespeed Identity API",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
-  "variable": [{ "key": "baseUrl", "value": "http://localhost:3000" }],
-  "item": [
-    {
-      "name": "Create New Contact",
-      "request": {
-        "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "body": { "mode": "raw", "raw": "{\"email\": \"lorraine@hillvalley.edu\", \"phoneNumber\": \"123456\"}" },
-        "url": { "raw": "{{baseUrl}}/identify", "host": ["{{baseUrl}}"], "path": ["identify"] }
-      }
-    },
-    {
-      "name": "Link by Email",
-      "request": {
-        "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "body": { "mode": "raw", "raw": "{\"email\": \"lorraine@hillvalley.edu\", \"phoneNumber\": \"999999\"}" },
-        "url": { "raw": "{{baseUrl}}/identify", "host": ["{{baseUrl}}"], "path": ["identify"] }
-      }
-    },
-    {
-      "name": "Merge Two Primaries",
-      "request": {
-        "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "body": { "mode": "raw", "raw": "{\"email\": \"george@hillvalley.edu\", \"phoneNumber\": \"838383\"}" },
-        "url": { "raw": "{{baseUrl}}/identify", "host": ["{{baseUrl}}"], "path": ["identify"] }
-      }
-    },
-    {
-      "name": "Only Email",
-      "request": {
-        "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "body": { "mode": "raw", "raw": "{\"email\": \"onlyemail@test.com\"}" },
-        "url": { "raw": "{{baseUrl}}/identify", "host": ["{{baseUrl}}"], "path": ["identify"] }
-      }
-    },
-    {
-      "name": "Only Phone",
-      "request": {
-        "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "body": { "mode": "raw", "raw": "{\"phoneNumber\": \"5555555555\"}" },
-        "url": { "raw": "{{baseUrl}}/identify", "host": ["{{baseUrl}}"], "path": ["identify"] }
-      }
-    },
-    {
-      "name": "Health Check",
-      "request": {
-        "method": "GET",
-        "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] }
-      }
-    }
-  ]
-}
+# Production
+npx prisma migrate deploy
+
+# View DB
+npx prisma studio
+
+# Reset DB (Dev only)
+npx prisma migrate reset
 ```
 
 ---
 
-## Migration Commands
+## Author
 
-```bash
-# Development — creates migration files under prisma/migrations/
-npx prisma migrate dev --name init
-
-# Production — applies existing migrations (used on Render)
-npx prisma migrate deploy
-
-# View database in browser GUI
-npx prisma studio
-
-# Reset DB — DESTROYS ALL DATA, dev only
-npx prisma migrate reset
-```
+Built as part of the Bitespeed Backend Engineering Task.

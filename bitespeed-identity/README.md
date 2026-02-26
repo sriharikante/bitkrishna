@@ -276,4 +276,4 @@ npx prisma migrate reset
 
 ## Author
 
-Built as part of the Bitespeed Backend Engineering Task.
+Developed as part of the Bitespeed Backend Engineering Assessment.

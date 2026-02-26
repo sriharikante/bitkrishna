@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("postgresql://bitkrishna_db_user:1iWhOft6rNv8NTc3zVgJnixNkoLMxjI5@dpg-d6g7qsp5pdvs73dcv240-a/bitkrishna_db")
+  url      = env("DATABASE_URL")
 }
 
 model Contact {
